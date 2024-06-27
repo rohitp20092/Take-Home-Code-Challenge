@@ -5,6 +5,7 @@ Rails.application.routes.draw do
       resources :transactions, only: [] do
         collection do
           post :single, to: 'transactions#create'
+          post :bulk, to: 'transactions#bulk_transactions'
         end
       end
     end
