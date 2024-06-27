@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: developer
+          POSTGRES_PASSWORD: password
+
+    env:
+      RAILS_ENV: test
+      DATABASE_URL: postgres://developer:password@localhost:5432/take_home_code_app_test
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2.2'
+        bundler-cache: true
+
+    - name: Install dependencies
+      run: bundle install
+
+    - name: Set up database
+      run: |
+        sudo apt-get install -y postgresql-client
+        bundle exec rails db:create
+        bundle exec rails db:schema:load
+
+    - name: Run tests
+      run: bundle exec rspec
